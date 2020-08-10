@@ -30,6 +30,31 @@ func readCredentials() error {
 	return json.Unmarshal(b, &oauthClient.Credentials)
 }
 
+func getTimeLine(tokenCred *oauth.Credentials) {
+	resp, err := oauthClient.Get(nil, tokenCred,
+		"https://api.twitter.com/1.1/statuses/home_timeline.json", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func getUser(tokenCred *oauth.Credentials) {
+	resp, err := oauthClient.Get(nil, tokenCred,
+		"https://api.twitter.com/1.1/account/verify_credentials.json", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
+		log.Fatal(err)
+	}
+
+}
+
 func main() {
 	// Obtaining a request token
 	if err := readCredentials(); err != nil {
@@ -53,15 +78,23 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("Welcome to TWITTER-GOCLI-APP!")
+	for {
+		fmt.Print("->")
+		var command string
+		fmt.Scanln(&command)
+		switch command {
+		case "timeline":
+			getTimeLine(tokenCred)
+			fmt.Print("\n")
+		case "name":
+			getUser(tokenCred)
+			fmt.Print("\n")
 
-	resp, err := oauthClient.Get(nil, tokenCred,
-		"https://api.twitter.com/1.1/statuses/home_timeline.json", nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-	if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
-		log.Fatal(err)
+		case "exit":
+			fmt.Println("CLI terminating")
+			return
+		}
 	}
 
 }
