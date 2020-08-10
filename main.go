@@ -22,6 +22,14 @@ var oauthClient = oauth.Client{
 
 var credPath = flag.String("config", "config.json", "Path to configuration file containing the application's credentials.")
 
+type User struct {
+	Id         int64  `json:"id"`
+	Name       string `json:"name"`
+	ScreenName string `json:"screen_name"`
+}
+
+var user = User{}
+
 func readCredentials() error {
 	b, err := ioutil.ReadFile(*credPath)
 	if err != nil {
@@ -48,8 +56,12 @@ func getUser(tokenCred *oauth.Credentials) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	defer resp.Body.Close()
-	if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
+	buf, err := ioutil.ReadAll(resp.Body)
+
+	json.Unmarshal(buf, &user)
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -79,18 +91,16 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println("Welcome to TWITTER-GOCLI-APP!")
+
+	getUser(tokenCred)
 	for {
-		fmt.Print("->")
+		fmt.Printf("@%v=>", user.ScreenName)
 		var command string
 		fmt.Scanln(&command)
 		switch command {
 		case "timeline":
 			getTimeLine(tokenCred)
 			fmt.Print("\n")
-		case "name":
-			getUser(tokenCred)
-			fmt.Print("\n")
-
 		case "exit":
 			fmt.Println("CLI terminating")
 			return
