@@ -31,9 +31,6 @@ func readCredentials() error {
 }
 
 func main() {
-	fmt.Println("hello")
-	// https://developer.twitter.com/en/docs/basics/authentication/api-reference/request_token
-
 	// Obtaining a request token
 	if err := readCredentials(); err != nil {
 		log.Fatal(err)
@@ -46,7 +43,7 @@ func main() {
 
 	u := oauthClient.AuthorizationURL(tempCred, nil)
 
-	fmt.Printf("1. Go to %s\n2. Authorize the application\n3. Enter verification code:\n", u)
+	fmt.Println("Enter verification code:")
 	openbrowser(u)
 
 	var code string
