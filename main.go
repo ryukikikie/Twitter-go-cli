@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"time"
 
 	"github.com/gomodule/oauth1/oauth"
 )
@@ -114,19 +115,23 @@ func main() {
 		switch command {
 		case "timeline":
 			getTimeLine(tokenCred)
-			fmt.Print("\n")
 		case "tweet":
 			fmt.Println("Make a tweet through CLI🧊")
 			inputReader := bufio.NewReader(os.Stdin)
 			input, _ := inputReader.ReadString('\n')
 			createPost(tokenCred, input)
-			fmt.Print("\n")
 		case "exit":
-			fmt.Println("CLI terminating")
+			fmt.Print("CLI terminating")
+			//insert settimeout & loop below
+			for i := 0; i < 3; i++ {
+				time.Sleep(500 * time.Millisecond)
+				fmt.Print(".")
+			}
+			fmt.Println()
 			return
 		}
+		fmt.Println()
 	}
-
 }
 
 func openbrowser(url string) {
