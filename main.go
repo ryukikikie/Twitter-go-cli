@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"runtime"
@@ -49,8 +51,20 @@ func getTimeLine(tokenCred *oauth.Credentials) {
 		log.Fatal(err)
 	}
 }
+func createPost(tokenCred *oauth.Credentials, tweet string) {
+	v := url.Values{}
+	v.Set("status", tweet)
+	urlStr := "https://api.twitter.com/1.1/statuses/update.json"
+	resp, err := oauthClient.Post(nil, tokenCred, urlStr, v)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+}
 
 func getUser(tokenCred *oauth.Credentials) {
+
 	resp, err := oauthClient.Get(nil, tokenCred,
 		"https://api.twitter.com/1.1/account/verify_credentials.json", nil)
 	if err != nil {
@@ -83,10 +97,10 @@ func main() {
 	fmt.Println("Enter verification code:")
 	openbrowser(u)
 
-	var code string
-	fmt.Scanln(&code)
+	var verificationCode string
+	fmt.Scanln(&verificationCode)
 
-	tokenCred, _, err := oauthClient.RequestToken(nil, tempCred, code)
+	tokenCred, _, err := oauthClient.RequestToken(nil, tempCred, verificationCode)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,6 +114,12 @@ func main() {
 		switch command {
 		case "timeline":
 			getTimeLine(tokenCred)
+			fmt.Print("\n")
+		case "tweet":
+			fmt.Println("Make a tweet through CLI🧊")
+			inputReader := bufio.NewReader(os.Stdin)
+			input, _ := inputReader.ReadString('\n')
+			createPost(tokenCred, input)
 			fmt.Print("\n")
 		case "exit":
 			fmt.Println("CLI terminating")
