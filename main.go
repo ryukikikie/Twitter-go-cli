@@ -32,6 +32,23 @@ type User struct {
 }
 
 var user = User{}
+var client TestClient = 
+
+type TestClient interface {
+	multiply(a int, b int) int
+}
+
+type data string
+
+//mocked by main_test
+func (data data) multiply(a int, b int) int {
+	return a * b
+}
+
+func TestedFunction() int {
+	fmt.Println("called TestedFunction")
+	return client.multiply(1, 3)
+}
 
 func readCredentials() error {
 	b, err := ioutil.ReadFile(*credPath)
