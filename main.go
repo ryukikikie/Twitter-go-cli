@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -60,9 +61,6 @@ func createPost(tokenCred *oauth.Credentials, tweet string) {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-	if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
-		log.Fatal(err)
-	}
 }
 
 func getUser(tokenCred *oauth.Credentials) {
@@ -118,9 +116,10 @@ func main() {
 			getTimeLine(tokenCred)
 			fmt.Print("\n")
 		case "tweet":
-			var tweet string
-			fmt.Scanln(&tweet)
-			createPost(tokenCred, tweet)
+			fmt.Println("Make a tweet through CLI🧊")
+			inputReader := bufio.NewReader(os.Stdin)
+			input, _ := inputReader.ReadString('\n')
+			createPost(tokenCred, input)
 			fmt.Print("\n")
 		case "exit":
 			fmt.Println("CLI terminating")
