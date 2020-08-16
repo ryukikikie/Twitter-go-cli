@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/url"
 	"os"
 	"os/exec"
@@ -63,6 +64,18 @@ type User struct {
 	ScreenName string `json:"screen_name"`
 }
 
+type Tweet struct {
+	CreatedAt string `json:"created_at"`
+	Text      string `json:"text"`
+}
+
+type TweetArr []Tweet
+
+var user = User{}
+var tweet = Tweet{}
+
+var iconArr = []string{"🐉", "🐍", "🐲"}
+
 func readCredentials() error {
 	b, err := ioutil.ReadFile(*credPath)
 	if err != nil {
@@ -72,12 +85,20 @@ func readCredentials() error {
 }
 
 func GetTimeLine(c Client, tokenCred *oauth.Credentials) {
+	v := url.Values{}
+	v.Set("count", "1")
 	urlStr := "https://api.twitter.com/1.1/statuses/home_timeline.json"
 	buf, err := c.ReqGet(tokenCred, urlStr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(buf))
+	var tweetArr TweetArr
+	json.Unmarshal(buf, &tweetArr)
+	for _, v := range tweetArr {
+		fmt.Println("(Created at " + v.CreatedAt + ")")
+		fmt.Println("Tweet")
+		fmt.Println(v.Text)
+	}
 }
 func CreatePost(c Client, tokenCred *oauth.Credentials, tweet string) {
 	v := url.Values{}
@@ -99,7 +120,6 @@ func GetUser(c Client, tokenCred *oauth.Credentials, user *User) {
 	}
 
 	json.Unmarshal(buf, &user)
-	fmt.Println(string(buf))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -130,20 +150,29 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	fmt.Println("Welcome to TWITTER-GOCLI-APP!")
+
+	dt := time.Now()
+	fmt.Println(dt.Format("01-02-2006 15:04:05 Mon"))
+
 	GetUser(&twitterClient, tokenCred, &user)
 	for {
-		fmt.Printf("@%v=>", user.ScreenName)
+		randomIndex := rand.Intn(len(iconArr))
+		avatar := iconArr[randomIndex]
+		fmt.Printf("[%v%v]", avatar, user.ScreenName)
 		var command string
 		fmt.Scanln(&command)
 		switch command {
 		case "timeline":
 			GetTimeLine(&twitterClient, tokenCred)
 		case "tweet":
-			fmt.Println("Make a tweet through CLI🧊")
+			fmt.Println("Tweet through CLI🧊")
 			inputReader := bufio.NewReader(os.Stdin)
 			input, _ := inputReader.ReadString('\n')
 			CreatePost(&twitterClient, tokenCred, input)
+		case "clear":
+			fmt.Print("\033[H\033[2J")
 		case "exit":
 			fmt.Print("CLI terminating")
 			//insert settimeout & loop below
@@ -153,6 +182,8 @@ func main() {
 			}
 			fmt.Println()
 			return
+		default:
+			fmt.Println("Input command doesn't exit 😂, or some typo")
 		}
 		fmt.Println()
 	}
