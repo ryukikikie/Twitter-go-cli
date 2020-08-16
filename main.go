@@ -33,7 +33,9 @@ func (tc *TwClient) ReqGet(credentials *oauth.Credentials, urlStr string) ([]byt
 		return nil, err
 	}
 	defer resp.Body.Close()
-	//TODO If stats code is not 200 return err
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Get request return %d", resp.StatusCode)
+	}
 	buf, err := ioutil.ReadAll(resp.Body)
 	return buf, err
 }
@@ -44,7 +46,9 @@ func (tc *TwClient) ReqPost(credentials *oauth.Credentials, urlStr string, form 
 		return nil, err
 	}
 	defer resp.Body.Close()
-	//TODO If stats code is not 200 return err
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Get request return %d", resp.StatusCode)
+	}
 	buf, err := ioutil.ReadAll(resp.Body)
 	return buf, err
 }
@@ -157,6 +161,7 @@ func main() {
 	fmt.Println(dt.Format("01-02-2006 15:04:05 Mon"))
 
 	GetUser(&twitterClient, tokenCred, &user)
+
 	for {
 		randomIndex := rand.Intn(len(iconArr))
 		avatar := iconArr[randomIndex]
