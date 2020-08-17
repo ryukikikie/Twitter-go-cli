@@ -107,7 +107,10 @@ func CreatePost(c Client, tokenCred *oauth.Credentials, tweet string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(buf))
+	var createdTweet Tweet
+	json.Unmarshal(buf, &createdTweet)
+	fmt.Println("Your tweet has been posted!")
+	fmt.Println("(Created at " + createdTweet.CreatedAt + ") " + createdTweet.Text)
 }
 
 func GetUser(c Client, tokenCred *oauth.Credentials, user *User) {
