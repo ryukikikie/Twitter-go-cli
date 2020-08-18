@@ -120,8 +120,8 @@ type User struct {
 }
 
 type Tweet struct {
-	CreatedAt time.Time `json:"created_at"`
-	Text      string    `json:"text"`
+	CreatedAt CustomTime `json:"created_at"`
+	Text      string     `json:"text"`
 }
 
 var iconArr = []string{"🐉", "🐍", "🐲"}
