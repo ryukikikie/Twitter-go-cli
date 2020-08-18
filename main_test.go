@@ -16,9 +16,12 @@ type MockClient struct {
 	client oauth.Client
 }
 
-func (mc *MockClient) ReqGet(credentials *oauth.Credentials, urlStr string) ([]byte, error) {
+func (mc *MockClient) ReqGet(credentials *oauth.Credentials, urlStr string, form url.Values) ([]byte, error) {
 	switch urlStr {
 	case "https://api.twitter.com/1.1/account/verify_credentials.json":
+		if form != nil {
+			return nil, errors.New("getUser cannot take url.Values as a argument")
+		}
 		responseBody, err := ioutil.ReadFile("./test/responseData/getUser.json")
 		if err != nil {
 			return nil, err

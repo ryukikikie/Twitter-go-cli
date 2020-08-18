@@ -48,7 +48,7 @@ var commands = map[string]Command{
 
 // Wrap original oauth client method to mock test easily
 type Client interface {
-	ReqGet(credentials *oauth.Credentials, urlStr string) ([]byte, error)
+	ReqGet(credentials *oauth.Credentials, urlStr string, form url.Values) ([]byte, error)
 	ReqPost(credentials *oauth.Credentials, urlStr string, form url.Values) ([]byte, error)
 }
 
@@ -56,8 +56,8 @@ type TwClient struct {
 	client oauth.Client
 }
 
-func (tc *TwClient) ReqGet(credentials *oauth.Credentials, urlStr string) ([]byte, error) {
-	resp, err := tc.client.Get(nil, credentials, urlStr, nil)
+func (tc *TwClient) ReqGet(credentials *oauth.Credentials, urlStr string, form url.Values) ([]byte, error) {
+	resp, err := tc.client.Get(nil, credentials, urlStr, form)
 	if err != nil {
 		return nil, err
 	}
@@ -135,10 +135,10 @@ func readCredentials() error {
 }
 
 func GetTimeLine(c Client, tokenCred *oauth.Credentials, limit int) {
-	v := url.Values{}
-	v.Set("count", string(limit))
+	values := url.Values{}
+	values.Set("count", string(limit))
 	urlStr := "https://api.twitter.com/1.1/statuses/home_timeline.json"
-	buf, err := c.ReqGet(tokenCred, urlStr)
+	buf, err := c.ReqGet(tokenCred, urlStr, values)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -154,10 +154,10 @@ func GetTimeLine(c Client, tokenCred *oauth.Credentials, limit int) {
 	}
 }
 func CreatePost(c Client, tokenCred *oauth.Credentials, tweet string) {
-	v := url.Values{}
-	v.Set("status", tweet)
+	values := url.Values{}
+	values.Set("status", tweet)
 	urlStr := "https://api.twitter.com/1.1/statuses/update.json"
-	buf, err := c.ReqPost(tokenCred, urlStr, v)
+	buf, err := c.ReqPost(tokenCred, urlStr, values)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -170,7 +170,7 @@ func CreatePost(c Client, tokenCred *oauth.Credentials, tweet string) {
 func GetUser(c Client, tokenCred *oauth.Credentials, user *User) {
 
 	urlStr := "https://api.twitter.com/1.1/account/verify_credentials.json"
-	buf, err := c.ReqGet(tokenCred, urlStr)
+	buf, err := c.ReqGet(tokenCred, urlStr, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
