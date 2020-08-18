@@ -17,6 +17,34 @@ import (
 	"github.com/gomodule/oauth1/oauth"
 )
 
+type Command struct {
+	description string
+	option      map[string]string // it's not used now
+}
+
+var commands = map[string]Command{
+	"timeline": Command{
+		description: "Get timeline",
+		option:      make(map[string]string),
+	},
+	"tweet": Command{
+		description: "Post tweet",
+		option:      make(map[string]string),
+	},
+	"clear": Command{
+		description: "Clear console",
+		option:      make(map[string]string),
+	},
+	"exit": Command{
+		description: "Terminate this cli client",
+		option:      make(map[string]string),
+	},
+	"help": Command{
+		description: "Show how to use",
+		option:      make(map[string]string),
+	},
+}
+
 // Wrap original oauth client method to mock test easily
 type Client interface {
 	ReqGet(credentials *oauth.Credentials, urlStr string) ([]byte, error)
@@ -127,6 +155,40 @@ func GetUser(c Client, tokenCred *oauth.Credentials, user *User) {
 	}
 }
 
+func Clear() {
+	fmt.Print("\033[H\033[2J")
+}
+
+func Exit() {
+	fmt.Print("CLI terminating")
+	//insert settimeout & loop below
+	for i := 0; i < 3; i++ {
+		time.Sleep(500 * time.Millisecond)
+		fmt.Print(".")
+	}
+	fmt.Println()
+	os.Exit(1)
+}
+
+func Help() {
+	fmt.Println("Usage:")
+	fmt.Println()
+	fmt.Println("        <command> [arguments]")
+	fmt.Println()
+	fmt.Println("The commands are:")
+	fmt.Println()
+	for name, command := range commands {
+		fmt.Printf("        %s:%s\n", name, command.description)
+		if len(command.option) > 0 {
+			fmt.Println("        options")
+		}
+		for o, description := range command.option {
+			fmt.Printf("%s : %s\n", o, description)
+		}
+	}
+
+}
+
 func main() {
 
 	var user = User{}
@@ -166,6 +228,7 @@ func main() {
 		fmt.Printf("[%v%v]", avatar, user.ScreenName)
 		var command string
 		fmt.Scanln(&command)
+
 		switch command {
 		case "timeline":
 			GetTimeLine(&twitterClient, tokenCred, 2)
@@ -175,18 +238,14 @@ func main() {
 			input, _ := inputReader.ReadString('\n')
 			CreatePost(&twitterClient, tokenCred, input)
 		case "clear":
-			fmt.Print("\033[H\033[2J")
+			Clear()
 		case "exit":
-			fmt.Print("CLI terminating")
-			//insert settimeout & loop below
-			for i := 0; i < 3; i++ {
-				time.Sleep(500 * time.Millisecond)
-				fmt.Print(".")
-			}
-			fmt.Println()
-			return
+			Exit()
+		case "help":
+			Help()
 		default:
 			fmt.Println("Input command doesn't exit 😂, or some typo")
+			fmt.Println("If you need any help, see 'help'")
 		}
 		fmt.Println()
 	}
