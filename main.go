@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/gomodule/oauth1/oauth"
@@ -90,6 +91,28 @@ var twitterClient TwClient = TwClient{
 
 var credPath = flag.String("config", "config.json", "Path to configuration file containing the application's credentials.")
 
+var CustomTimeFormatter = "01-02-2006 15:04:05 Mon"
+
+type CustomTime struct {
+	time.Time
+}
+
+func NowCustomTime() CustomTime {
+	return CustomTime{time.Now()}
+}
+func (t *CustomTime) UnmarshalJSON(buf []byte) error {
+	tt, err := time.Parse(time.RubyDate, strings.Trim(string(buf), `"`))
+	if err != nil {
+		return err
+	}
+	t.Time = tt
+	return nil
+}
+
+func (t CustomTime) Format() string {
+	return time.Time(t.Time).Format(CustomTimeFormatter)
+}
+
 type User struct {
 	Id         int64  `json:"id"`
 	Name       string `json:"name"`
@@ -97,8 +120,8 @@ type User struct {
 }
 
 type Tweet struct {
-	CreatedAt string `json:"created_at"`
-	Text      string `json:"text"`
+	CreatedAt time.Time `json:"created_at"`
+	Text      string    `json:"text"`
 }
 
 var iconArr = []string{"🐉", "🐍", "🐲"}
@@ -120,11 +143,14 @@ func GetTimeLine(c Client, tokenCred *oauth.Credentials, limit int) {
 		log.Fatal(err)
 	}
 	var tweets []Tweet
-	json.Unmarshal(buf, &tweets)
-	for _, v := range tweets {
-		fmt.Println("(Created at " + v.CreatedAt + ")")
-		fmt.Println("Tweet")
-		fmt.Println(v.Text)
+	err = json.Unmarshal(buf, &tweets)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, tweet := range tweets {
+		fmt.Printf("(Created at %s)\n", tweet.CreatedAt.Format())
+		fmt.Println("---Tweet---")
+		fmt.Println(tweet.Text)
 	}
 }
 func CreatePost(c Client, tokenCred *oauth.Credentials, tweet string) {
@@ -138,7 +164,7 @@ func CreatePost(c Client, tokenCred *oauth.Credentials, tweet string) {
 	var createdTweet Tweet
 	json.Unmarshal(buf, &createdTweet)
 	fmt.Println("Your tweet has been posted!")
-	fmt.Println("(Created at " + createdTweet.CreatedAt + ") " + createdTweet.Text)
+	fmt.Printf("(Created at %s) %s\n", createdTweet.CreatedAt.Format(), createdTweet.Text)
 }
 
 func GetUser(c Client, tokenCred *oauth.Credentials, user *User) {
@@ -217,8 +243,8 @@ func main() {
 
 	fmt.Println("Welcome to TWITTER-GOCLI-APP!")
 
-	dt := time.Now()
-	fmt.Println(dt.Format("01-02-2006 15:04:05 Mon"))
+	dt := NowCustomTime()
+	fmt.Println(dt.Format())
 
 	GetUser(&twitterClient, tokenCred, &user)
 
