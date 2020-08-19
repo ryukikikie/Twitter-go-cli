@@ -33,7 +33,9 @@ func (tc *TwClient) ReqGet(credentials *oauth.Credentials, urlStr string) ([]byt
 		return nil, err
 	}
 	defer resp.Body.Close()
-	//TODO If stats code is not 200 return err
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Get request return %d", resp.StatusCode)
+	}
 	buf, err := ioutil.ReadAll(resp.Body)
 	return buf, err
 }
@@ -44,7 +46,9 @@ func (tc *TwClient) ReqPost(credentials *oauth.Credentials, urlStr string, form 
 		return nil, err
 	}
 	defer resp.Body.Close()
-	//TODO If stats code is not 200 return err
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Get request return %d", resp.StatusCode)
+	}
 	buf, err := ioutil.ReadAll(resp.Body)
 	return buf, err
 }
@@ -69,11 +73,6 @@ type Tweet struct {
 	Text      string `json:"text"`
 }
 
-type TweetArr []Tweet
-
-var user = User{}
-var tweet = Tweet{}
-
 var iconArr = []string{"🐉", "🐍", "🐲"}
 
 func readCredentials() error {
@@ -84,17 +83,17 @@ func readCredentials() error {
 	return json.Unmarshal(b, &twitterClient.client.Credentials)
 }
 
-func GetTimeLine(c Client, tokenCred *oauth.Credentials) {
+func GetTimeLine(c Client, tokenCred *oauth.Credentials, limit int) {
 	v := url.Values{}
-	v.Set("count", "1")
+	v.Set("count", string(limit))
 	urlStr := "https://api.twitter.com/1.1/statuses/home_timeline.json"
 	buf, err := c.ReqGet(tokenCred, urlStr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	var tweetArr TweetArr
-	json.Unmarshal(buf, &tweetArr)
-	for _, v := range tweetArr {
+	var tweets []Tweet
+	json.Unmarshal(buf, &tweets)
+	for _, v := range tweets {
 		fmt.Println("(Created at " + v.CreatedAt + ")")
 		fmt.Println("Tweet")
 		fmt.Println(v.Text)
@@ -157,6 +156,7 @@ func main() {
 	fmt.Println(dt.Format("01-02-2006 15:04:05 Mon"))
 
 	GetUser(&twitterClient, tokenCred, &user)
+
 	for {
 		randomIndex := rand.Intn(len(iconArr))
 		avatar := iconArr[randomIndex]
@@ -165,7 +165,7 @@ func main() {
 		fmt.Scanln(&command)
 		switch command {
 		case "timeline":
-			GetTimeLine(&twitterClient, tokenCred)
+			GetTimeLine(&twitterClient, tokenCred, 2)
 		case "tweet":
 			fmt.Println("Tweet through CLI🧊")
 			inputReader := bufio.NewReader(os.Stdin)
