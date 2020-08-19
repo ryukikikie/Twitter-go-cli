@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -136,7 +137,7 @@ func readCredentials() error {
 
 func GetTimeLine(c Client, tokenCred *oauth.Credentials, limit int) {
 	values := url.Values{}
-	values.Set("count", string(limit))
+	values.Set("count", strconv.Itoa(limit))
 	urlStr := "https://api.twitter.com/1.1/statuses/home_timeline.json"
 	buf, err := c.ReqGet(tokenCred, urlStr, values)
 	if err != nil {
@@ -153,6 +154,7 @@ func GetTimeLine(c Client, tokenCred *oauth.Credentials, limit int) {
 		fmt.Println(tweet.Text)
 	}
 }
+
 func CreatePost(c Client, tokenCred *oauth.Credentials, tweet string) {
 	values := url.Values{}
 	values.Set("status", tweet)
