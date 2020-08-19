@@ -30,14 +30,29 @@ func (mc *MockClient) ReqGet(credentials *oauth.Credentials, urlStr string) ([]b
 			return nil, err
 		}
 		return responseBody, nil
+	default:
+		return nil, errors.New("Not implimented")
 	}
-	return nil, errors.New("Not implimented")
 }
 
+type TweetFormat struct {
+	CreatedAt string
+	Text      string
+}
+
+var NumberOfLinePerTweet = int(3)
+
 func (mc *MockClient) ReqPost(credentials *oauth.Credentials, urlStr string, form url.Values) ([]byte, error) {
-	//Return test data
-	fmt.Println("Call mock Post function! but it's not implimented")
-	return nil, errors.New("Not implimented")
+	switch urlStr {
+	case "https://api.twitter.com/1.1/statuses/update.json":
+		responseBody, err := ioutil.ReadFile("./test/responseData/createPost.json")
+		if err != nil {
+			return nil, err
+		}
+		return responseBody, nil
+	default:
+		return nil, errors.New("Not implimented")
+	}
 }
 
 var twitterMockClient MockClient = MockClient{
@@ -59,13 +74,6 @@ func TestGetUser(t *testing.T) {
 
 func TestGetTimeLine(t *testing.T) {
 
-	type TweetFormat struct {
-		CreatedAt string
-		Text      string
-	}
-
-	var NumberOfLinePerTweet = int(3)
-
 	expectedTweets := []TweetFormat{
 		TweetFormat{
 			CreatedAt: "(Created at Sun Aug 16 23:45:54 +0000 2020)",
@@ -83,7 +91,6 @@ func TestGetTimeLine(t *testing.T) {
 		t.Fatalf("Number of tweet must be %v, result:%v", len(expectedTweets), len(output)/NumberOfLinePerTweet)
 	}
 	for i := 0; i < len(expectedTweets); i++ {
-		t.Log(i)
 		if expectedTweets[i].CreatedAt != output[(i*NumberOfLinePerTweet)] {
 			t.Fatalf("CreatedAt must be %v, result:%v", expectedTweets[i].CreatedAt, output[(i*NumberOfLinePerTweet)])
 		}
@@ -93,8 +100,26 @@ func TestGetTimeLine(t *testing.T) {
 		expectedTweetText := strings.Split(expectedTweets[i].Text, "\n")
 		for j := 0; j < len(expectedTweetText); j++ {
 			if expectedTweetText[j] != output[(i*NumberOfLinePerTweet)+2+j] {
-				t.Fatalf("Text must be  %v, result:%v", expectedTweets[j].Text, output[(i*NumberOfLinePerTweet)+2+j])
+				t.Fatalf("Text must be  %v, result:%v", expectedTweetText[j], output[(i*NumberOfLinePerTweet)+2+j])
 			}
 		}
+	}
+}
+
+func TestCreatePost(t *testing.T) {
+	expectedTweet := TweetFormat{
+		CreatedAt: "(Created at Mon Aug 17 11:16:12 +0000 2020)",
+		Text:      "This is tweet is created by my twitter CLI client using Golang.. just test",
+	}
+
+	outputs := test.CaptureOutput(func() {
+		CreatePost(&twitterMockClient, nil, expectedTweet.Text) // Don't need credential
+	})
+	output := strings.Split(outputs, "\n")
+	if "Your tweet has been posted!" != output[0] {
+		t.Fatalf("First line must be 'Your tweet has been posted!', result:%v", output[0])
+	}
+	if fmt.Sprintf("%v %v", expectedTweet.CreatedAt, expectedTweet.Text) != output[1] {
+		t.Fatalf("CreatedAt and posted tweet must be %v %v, result:%v", expectedTweet.CreatedAt, expectedTweet.Text, output[1])
 	}
 }
