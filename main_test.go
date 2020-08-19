@@ -123,3 +123,18 @@ func TestCreatePost(t *testing.T) {
 		t.Fatalf("CreatedAt and posted tweet must be %v %v, result:%v", expectedTweet.CreatedAt, expectedTweet.Text, output[1])
 	}
 }
+
+func TestHelp(t *testing.T) {
+	allCommand := []string{
+		"timeline", "tweet", "exit", "clear", "exit",
+	}
+
+	outputs := test.CaptureOutput(func() {
+		Help()
+	})
+	for _, c := range allCommand {
+		if !strings.Contains(outputs, c) {
+			t.Fatalf("%v should be included in help", c)
+		}
+	}
+}
