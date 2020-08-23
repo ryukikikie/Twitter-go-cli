@@ -43,6 +43,7 @@ func (mc *MockClient) ReqGet(credentials *oauth.Credentials, urlStr string, form
 type TweetFormat struct {
 	CreatedAtText string
 	Text          string
+	Author        string
 }
 
 var NumberOfLinePerTweet = int(3)
@@ -83,10 +84,13 @@ func TestGetTimeLine(t *testing.T) {
 		TweetFormat{
 			CreatedAtText: "(Created at 08-16-2020 23:45:54 Sun)",
 			Text:          "@test_user congrats!〜🥳",
+			Author:        "地獄寺",
 		},
 		TweetFormat{
 			CreatedAtText: "(Created at 08-16-2020 23:43:17 Sun)",
-			Text:          "Good morning!\nおはようございます〜！"},
+			Text:          "Good morning!\nおはようございます〜！",
+			Author:        "ヤマダ",
+		},
 	}
 	outputs := test.CaptureOutput(func() {
 		controller.GetTimeLine(&twitterMockClient, nil, 2) // Don't need credential
@@ -96,8 +100,9 @@ func TestGetTimeLine(t *testing.T) {
 		t.Fatalf("Number of tweet must be %v, result:%v", len(expectedTweets), len(output)/NumberOfLinePerTweet)
 	}
 	for i := 0; i < len(expectedTweets); i++ {
-		if expectedTweets[i].CreatedAtText != output[(i*NumberOfLinePerTweet)] {
-			t.Fatalf("CreatedAt must be %v, result:%v", expectedTweets[i].CreatedAtText, output[(i*NumberOfLinePerTweet)])
+		expectedString := "Published by " + expectedTweets[i].Author + " " + expectedTweets[i].CreatedAtText
+		if expectedString != output[(i*NumberOfLinePerTweet)] {
+			t.Fatalf("Author and CreatedAt must be %v, result:%v", expectedString, output[(i*NumberOfLinePerTweet)])
 		}
 		if "---Tweet---" != output[(i*NumberOfLinePerTweet)+1] {
 			t.Fatalf("Seccond line must be Tweet, result:%v", output[(i*NumberOfLinePerTweet)+1])
