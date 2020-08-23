@@ -11,9 +11,6 @@ type CustomTime struct {
 	time.Time
 }
 
-func NowCustomTime() CustomTime {
-	return CustomTime{time.Now()}
-}
 func (t *CustomTime) UnmarshalJSON(buf []byte) error {
 	tt, err := time.Parse(time.RubyDate, strings.Trim(string(buf), `"`))
 	if err != nil {

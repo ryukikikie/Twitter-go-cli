@@ -11,6 +11,10 @@ import (
 type TwClient struct {
 	Client oauth.Client
 }
+type Client interface {
+	ReqGet(credentials *oauth.Credentials, urlStr string, form url.Values) ([]byte, error)
+	ReqPost(credentials *oauth.Credentials, urlStr string, form url.Values) ([]byte, error)
+}
 
 func NewTwClient() TwClient {
 	return TwClient{

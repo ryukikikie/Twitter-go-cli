@@ -16,34 +16,7 @@ import (
 	"github.com/ryukikikie/twitter-go-cli/controller"
 )
 
-type Command struct {
-	description string
-	option      map[string]string // it's not used now
-}
-
 var twitterClient = controller.NewTwClient()
-var commands = map[string]Command{
-	"timeline": Command{
-		description: "Get timeline",
-		option:      make(map[string]string),
-	},
-	"tweet": Command{
-		description: "Post tweet",
-		option:      make(map[string]string),
-	},
-	"clear": Command{
-		description: "Clear console",
-		option:      make(map[string]string),
-	},
-	"exit": Command{
-		description: "Terminate this cli client",
-		option:      make(map[string]string),
-	},
-	"help": Command{
-		description: "Show how to use",
-		option:      make(map[string]string),
-	},
-}
 
 var credPath = flag.String("config", "config.json", "Path to configuration file containing the application's credentials.")
 
@@ -72,27 +45,7 @@ func Exit() {
 	os.Exit(1)
 }
 
-func Help() {
-	fmt.Println("Usage:")
-	fmt.Println()
-	fmt.Println("        <command> [arguments]")
-	fmt.Println()
-	fmt.Println("The commands are:")
-	fmt.Println()
-	for name, command := range commands {
-		fmt.Printf("        %s:%s\n", name, command.description)
-		if len(command.option) > 0 {
-			fmt.Println("        options")
-		}
-		for o, description := range command.option {
-			fmt.Printf("%s : %s\n", o, description)
-		}
-	}
-
-}
-
 func main() {
-
 	var user = controller.NewUser()
 	// Obtaining a request token
 	if err := readCredentials(); err != nil {
@@ -144,7 +97,7 @@ func main() {
 		case "exit":
 			Exit()
 		case "help":
-			Help()
+			controller.Help()
 		default:
 			fmt.Println("Input command doesn't exit 😂, or some typo")
 			fmt.Println("If you need any help, see 'help'")
