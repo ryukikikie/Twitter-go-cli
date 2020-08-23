@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/gomodule/oauth1/oauth"
+	"github.com/ryukikikie/twitter-go-cli/controller"
+	"github.com/ryukikikie/twitter-go-cli/models"
 	"github.com/ryukikikie/twitter-go-cli/test"
 )
 
@@ -62,13 +64,13 @@ var twitterMockClient MockClient = MockClient{
 	client: oauth.Client{}}
 
 func TestGetUser(t *testing.T) {
-	var actual User
-	expected := User{
+	var actual models.User
+	expected := models.User{
 		Name:       "Miki.masumomo",
 		ScreenName: "m_miki0108",
 	}
 
-	GetUser(&twitterMockClient, nil, &actual) // Don't need credential
+	controller.GetUser(&twitterMockClient, nil, &actual) // Don't need credential
 
 	if actual.Name != expected.Name || actual.ScreenName != expected.ScreenName {
 		t.Fatalf("User must be %v", expected)
@@ -87,7 +89,7 @@ func TestGetTimeLine(t *testing.T) {
 			Text:          "Good morning!\nおはようございます〜！"},
 	}
 	outputs := test.CaptureOutput(func() {
-		GetTimeLine(&twitterMockClient, nil, 2) // Don't need credential
+		controller.GetTimeLine(&twitterMockClient, nil, 2) // Don't need credential
 	})
 	output := strings.Split(outputs, "\n")
 	if len(expectedTweets) != len(output)/NumberOfLinePerTweet {
@@ -116,7 +118,7 @@ func TestCreatePost(t *testing.T) {
 	}
 
 	outputs := test.CaptureOutput(func() {
-		CreatePost(&twitterMockClient, nil, expectedTweet.Text) // Don't need credential
+		controller.CreatePost(&twitterMockClient, nil, expectedTweet.Text) // Don't need credential
 	})
 	output := strings.Split(outputs, "\n")
 	if "Your tweet has been posted!" != output[0] {
@@ -133,7 +135,7 @@ func TestHelp(t *testing.T) {
 	}
 
 	outputs := test.CaptureOutput(func() {
-		Help()
+		controller.Help()
 	})
 	for _, c := range allCommand {
 		if !strings.Contains(outputs, c) {
