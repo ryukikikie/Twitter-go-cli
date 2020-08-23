@@ -30,9 +30,9 @@ func GetTimeLine(c models.Client, tokenCred *oauth.Credentials, limit int) {
 		log.Fatal(err)
 	}
 	for _, tweet := range tweets {
-		fmt.Printf("(Created at %s)\n", tweet.CreatedAt.Format())
 		fmt.Println("---Tweet---")
 		fmt.Println(tweet.Text)
+		fmt.Printf("Published by %v (at %s)\n", tweet.User.Name, tweet.CreatedAt.Format())
 	}
 }
 

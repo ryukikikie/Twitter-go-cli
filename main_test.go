@@ -82,12 +82,12 @@ func TestGetTimeLine(t *testing.T) {
 
 	expectedTweets := []TweetFormat{
 		TweetFormat{
-			CreatedAtText: "(Created at 08-16-2020 23:45:54 Sun)",
+			CreatedAtText: "(at 08-16-2020 23:45:54 Sun)",
 			Text:          "@test_user congrats!〜🥳",
 			Author:        "地獄寺",
 		},
 		TweetFormat{
-			CreatedAtText: "(Created at 08-16-2020 23:43:17 Sun)",
+			CreatedAtText: "(at 08-16-2020 23:43:17 Sun)",
 			Text:          "Good morning!\nおはようございます〜！",
 			Author:        "ヤマダ",
 		},
@@ -97,21 +97,21 @@ func TestGetTimeLine(t *testing.T) {
 	})
 	output := strings.Split(outputs, "\n")
 	if len(expectedTweets) != len(output)/NumberOfLinePerTweet {
-		t.Fatalf("Number of tweet must be %v, result:%v", len(expectedTweets), len(output)/NumberOfLinePerTweet)
+		t.Fatalf("Number of tweets must be %v, actual:%v", len(expectedTweets), len(output)/NumberOfLinePerTweet)
 	}
 	for i := 0; i < len(expectedTweets); i++ {
-		expectedString := "Published by " + expectedTweets[i].Author + " " + expectedTweets[i].CreatedAtText
-		if expectedString != output[(i*NumberOfLinePerTweet)] {
-			t.Fatalf("Author and CreatedAt must be %v, result:%v", expectedString, output[(i*NumberOfLinePerTweet)])
-		}
-		if "---Tweet---" != output[(i*NumberOfLinePerTweet)+1] {
-			t.Fatalf("Seccond line must be Tweet, result:%v", output[(i*NumberOfLinePerTweet)+1])
+		if "---Tweet---" != output[(i*NumberOfLinePerTweet)] {
+			t.Fatalf("First line of output must be Tweet, actual:%v", output[(i*NumberOfLinePerTweet)])
 		}
 		expectedTweetText := strings.Split(expectedTweets[i].Text, "\n")
 		for j := 0; j < len(expectedTweetText); j++ {
-			if expectedTweetText[j] != output[(i*NumberOfLinePerTweet)+2+j] {
-				t.Fatalf("Text must be  %v, result:%v", expectedTweetText[j], output[(i*NumberOfLinePerTweet)+2+j])
+			if expectedTweetText[j] != output[(i*NumberOfLinePerTweet)+1+j] {
+				t.Fatalf("Text must be  %v, actual:%v", expectedTweetText[j], output[(i*NumberOfLinePerTweet)+1+j])
 			}
+		}
+		expectedString := "Published by " + expectedTweets[i].Author + " " + expectedTweets[i].CreatedAtText
+		if expectedString != output[(i*NumberOfLinePerTweet)+len(expectedTweetText)+1] {
+			t.Fatalf("Author and CreatedAt must be %v, actual:%v", expectedString, output[(i*NumberOfLinePerTweet)+len(expectedTweetText)+1])
 		}
 	}
 }
@@ -127,10 +127,10 @@ func TestCreatePost(t *testing.T) {
 	})
 	output := strings.Split(outputs, "\n")
 	if "Your tweet has been posted!" != output[0] {
-		t.Fatalf("First line must be 'Your tweet has been posted!', result:%v", output[0])
+		t.Fatalf("First line must be 'Your tweet has been posted!', actual:%v", output[0])
 	}
 	if fmt.Sprintf("%v %v", expectedTweet.CreatedAtText, expectedTweet.Text) != output[1] {
-		t.Fatalf("CreatedAt and posted tweet must be %v %v, result:%v", expectedTweet.CreatedAtText, expectedTweet.Text, output[1])
+		t.Fatalf("CreatedAt and posted tweet must be %v %v, actual:%v", expectedTweet.CreatedAtText, expectedTweet.Text, output[1])
 	}
 }
 

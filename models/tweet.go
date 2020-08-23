@@ -27,4 +27,5 @@ func (t CustomTime) Format() string {
 type Tweet struct {
 	CreatedAt CustomTime `json:"created_at"`
 	Text      string     `json:"text"`
+	User      User       `json:"user"`
 }
