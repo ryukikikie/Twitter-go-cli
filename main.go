@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/ryukikikie/twitter-go-cli/controller"
+	"github.com/ryukikikie/twitter-go-cli/spinner"
 )
 
 var twitterClient = controller.NewTwClient()
@@ -46,6 +47,7 @@ func Exit() {
 }
 
 func main() {
+
 	var user = controller.NewUser()
 	// Obtaining a request token
 	if err := readCredentials(); err != nil {
@@ -58,7 +60,6 @@ func main() {
 	}
 
 	u := twitterClient.Client.AuthorizationURL(tempCred, nil)
-
 	fmt.Println("Enter verification code:")
 	openbrowser(u)
 
@@ -70,12 +71,18 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Welcome to TWITTER-GOCLI-APP!")
-
 	dt := controller.NowCustomTime()
 	fmt.Println(dt.Format())
 
 	controller.GetUser(&twitterClient, tokenCred, &user)
+
+	sp := spinner.NewSpinner("Welcome to TWITTER-GOCLI-APP!")
+	sp.SetSpeed(time.Millisecond * 100)
+	sp.SetCharset([]string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"})
+	sp.Start()
+	time.Sleep(time.Second * 1)
+	sp.Stop()
+	<-sp.IsDone
 
 	for {
 		randomIndex := rand.Intn(len(iconArr))
